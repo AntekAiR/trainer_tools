@@ -1,3 +1,9 @@
+Information
+===
+
+Project is my version of jludwig75`s project found on https://github.com/jludwig75/trainer_tools. 
+
+
 Trainer Tools
 ===
 
