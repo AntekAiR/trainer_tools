@@ -6,6 +6,11 @@ low=100
 medium=140
 high=160
 
+[LightControllerHeartRates]
+low=100
+medium=140
+high=160
+
 [Athlete]
 FTP=305
 
@@ -14,3 +19,6 @@ hr_swing = 5
 
 [PwrLEDs]
 pwr_swing = 2
+
+[HRLEDs]
+hr_led_swing = 2

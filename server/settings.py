@@ -29,3 +29,15 @@ class Settings(SettingsBase):
     @cherrypy.expose
     def power_swing_watts(self, power_swing_watts=None):
         return self.handle_setting_request('PwrLEDs', 'pwr_swing', int, power_swing_watts)
+
+    @cherrypy.expose
+    def light_controller_1_hr(self, fan_speed_1_hr=None):
+        return self.handle_setting_request('LightControllerHeartRates', 'low', int, light_controller_1_hr)
+
+    @cherrypy.expose
+    def light_controller_2_hr(self, fan_speed_2_hr=None):
+        return self.handle_setting_request('LightControllerHeartRates', 'medium', int, light_controller_2_hr)
+
+    @cherrypy.expose
+    def light_controller_3_hr(self, fan_speed_3_hr=None):
+        return self.handle_setting_request('LightControllerHeartRates', 'high', int, light_controller_3_hr)

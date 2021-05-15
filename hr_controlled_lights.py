@@ -29,7 +29,7 @@ from scriptcommon import init_logging
 
 from sensors.antnode import AntPlusNode
 from devices.lightstrip import ColorStrip, RgbColor
-from controllers.pwrlightcontroller import PowerLightController
+from controllers.hrlightcontroller import HRLightController
 
 
 NETWORK_KEY= [0xb9, 0xa5, 0x21, 0xfb, 0xbd, 0x72, 0xc3, 0x45]
@@ -59,8 +59,8 @@ def main():
         logging.info('Attaching ANT+ heart rate monitor')
         #pwr_meter = node.attach_power_meter()
         hrm = node.attach_hrm()
-        logging.info('Initializing power light controller')
-        plc = PowerLightController(node.stop, None, cfg, pwr_meter, color_strip)
+        logging.info('Initializing heart rate light controller')
+        hrlc = HRLightController(node.stop, None, cfg, hrm, color_strip)
         logging.info('Starting ANT+ node')        
         node.start()
     except Exception as e:
