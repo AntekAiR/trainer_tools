@@ -1,0 +1,309 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.min.js"></script>
+        <script>
+            const MSECS_PRE_SEC = 1000;
+            function SECONDS(seconds) {
+                return seconds * MSECS_PRE_SEC;
+            }
+            const SEC_PER_MINUTE = 60;
+            function MINUTES(minutes) {
+                return seconds(SEC_PER_MINUTE * minutes);
+            }
+            $( function() {
+              $( "#tabs" ).tabs();
+            } );
+            function setup_field_form(field_name, data_path) {
+                $("#" + field_name + "_edit").hide();
+                $("#" + field_name + "_error").hide();
+                $("#" + field_name + "_show").load(data_path + field_name, function() {
+                    $("#" + field_name + "_show").click(function(){
+                        var val = $("#" + field_name + "_show").text();
+                        $("#" + field_name + "_show").hide();
+                        $("#" + field_name + "_edit").show();
+                        $("#" + field_name + "_input").val(val);
+                        $("#" + field_name + "_input").focus();
+                        $("#" + field_name + "_input").select();
+                        $("#" + field_name + "_cancel").click(function(){
+                            $("#" + field_name + "_edit").hide();
+                            $("#" + field_name + "_show").show();
+                            $("#" + field_name + "_error").hide();
+                        });
+                        $("#" + field_name).ajaxForm({
+                            success: function() {
+                                $("#" + field_name + "_edit").hide();
+                                $("#" + field_name + "_error").hide();
+                                $("#" + field_name + "_show").show();
+                                $("#" + field_name + "_show").load(data_path + field_name);
+                                $('#user_message').text("Changes saved. Restart/start the service to use changes");
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                $("#" + field_name + "_error").show();
+                                $("#" + field_name + "_error").text('invalid value entered');
+                            }
+                        });
+                    });
+                });
+            }
+            function on_service_running() {
+                $("#service_status").text("Running");
+                $("#start_service").prop('disabled', true);
+                $("#stop_service").prop('disabled', false);
+                $("#restart_service").prop('disabled', false);
+            }
+            function on_service_stopped() {
+                $("#service_status").text("Stopped");
+                $("#start_service").prop('disabled', false);
+                $("#stop_service").prop('disabled', true);
+                $("#restart_service").prop('disabled', true);
+            }
+            function on_waiting_for_service_action(action) {
+                $("#service_status").text(action + " please wait...");
+                $("#start_service").prop('disabled', true);
+                $("#stop_service").prop('disabled', true);
+                $("#restart_service").prop('disabled', true);
+            }
+            var do_service_updates = true;
+            function update_service_status() {
+                if (!do_service_updates) {
+                    return;
+                }
+                $.get("/service/running", function(data) {
+                    if (data == "true") {
+                        on_service_running();
+                    } else {
+                        on_service_stopped();
+                    }
+                });
+            }
+            function service_buttons_init() {
+                on_waiting_for_service_action("Initializing...");
+                update_service_status();
+                $("#start_service").click(function() {
+                    do_service_updates = false;
+                    $('#user_message').text("");
+                    on_waiting_for_service_action("Starting...");
+                    $.ajax({url: "/service/start",
+                            type: "PUT",
+                            complete: function(jqXHR, status) {
+                                do_service_updates = true;
+                            },
+                            success: function(data, status, jqXHR) {
+                                do_service_updates = true;
+                                update_service_status();
+                            }});
+                });
+                $("#stop_service").click(function() {
+                    do_service_updates = false;
+                    $('#user_message').text("");
+                    on_waiting_for_service_action("Stopping...");
+                    $.ajax({url: "/service/stop",
+                            type: "PUT",
+                            complete: function(jqXHR, status) {
+                                do_service_updates = true;
+                            },
+                            success: function(data, status, jqXHR) {
+                                do_service_updates = true;
+                                update_service_status();
+                            }});
+                });
+                $("#restart_service").click(function() {
+                    do_service_updates = false;
+                    $('#user_message').text("");
+                    on_waiting_for_service_action("Restarting...");
+                    $.ajax({url: "/service/restart",
+                            type: "PUT",
+                            complete: function(jqXHR, status) {
+                                do_service_updates = true;
+                            },
+                            success: function(data, status, jqXHR) {
+                                do_service_updates = true;
+                                update_service_status();
+                            }});
+                });
+            }
+            function ConfirmDialog(title, message, on_no, on_yes) {
+            $('<div></div>').appendTo('body')
+                .html('<div><h6>' + message + '?</h6></div>')
+                .dialog({
+                modal: true,
+                title: title,
+                zIndex: 10000,
+                autoOpen: true,
+                width: 'auto',
+                resizable: false,
+                buttons: {
+                    Yes: function() {
+                        on_yes();
+                        $(this).dialog("close");
+                    },
+                    No: function() {
+                        on_no();
+                        $(this).dialog("close");
+                    }
+                },
+                close: function(event, ui) {
+                    $(this).remove();
+                }
+                });
+            };            
+            function system_buttons_init() {
+                $("#shutdown_system").click(function() {
+                    ConfirmDialog("Shutdown System", 'Are you sure you want to shutdown', function(){}, function() {
+                        $.ajax({
+                                    url: "/service/shutdown_system",
+                                    type: "PUT",
+                                    success: function() {
+                                        $('body').append('<h3>Shutting down system. Refresh page when system is back up.</h3>');
+                                        $(':button').prop('disabled', true);
+                                    }
+                                });
+                        });
+                });
+                $("#restart_system").click(function() {
+                    ConfirmDialog("Restart System", 'Are you sure you want to restart', function(){}, function() {
+                        $.ajax({
+                                    url: "/service/restart_system",
+                                    type: "PUT",
+                                    success: function() {
+                                        $('body').append('<h3>Restarting system. Refresh page when system is back up.</h3>');
+                                        $(':button').prop('disabled', true);
+                                    }
+                                });
+                        });
+                });
+            }
+            function update_5_seconds() {
+                update_service_status();
+            }
+            function update_1_second() {
+                update_service_status();
+                $("#hr_curr").load("/service/hr_curr");
+                $("#pwr_curr").load("/service/pwr_curr");
+            }
+            function init_script_form() {
+                $("#script_curr").load("/service/start_script");
+                $("#scripts").text('');
+                $('#script_form_submit').prop('disabled', false);
+                $.get("/service/start_script", function(current_script) {
+                    $.get("/service/start_scripts", function(data){
+                        var scripts = JSON.parse(data);
+                        scripts.forEach(function(item, idx) {
+                            if (current_script == item)
+                            {
+                                $("#scripts").append('<option value="' + item + '" selected>' + item + '</option>');
+                            }
+                            else
+                            {
+                                $("#scripts").append('<option value="' + item + '">' + item + '</option>');
+                            }
+                        });
+                    })
+                });
+            }
+            $(document).ready(function(){
+                $(".settings_field_form").each(function(){
+                    setup_field_form($(this).attr('id'), $(this).attr('data-path'))
+                });
+                init_script_form();
+                $("#script_form").ajaxForm( {
+                    beforeSubmit: function() {
+                        $('#script_form_submit').prop('disabled', true);
+                        $("#script_curr").text('Changing start script. Please wait...');
+                    },
+                    success: function() {
+                        init_script_form();
+                    },
+                    error: function() {
+                        alert("Failed to set start script");
+                        init_script_form();
+                    }
+                });
+                service_buttons_init();
+                system_buttons_init();
+                setInterval(update_5_seconds, SECONDS(5));
+                setInterval(update_1_second, SECONDS(1));
+            });
+        </script>
+        <style>
+            .name_field {
+                cursor:pointer;
+                color:blue;
+                text-decoration:underline;
+            }
+            .settings_field_error {
+                color:red;
+            }
+            .service_status {
+                padding-bottom: 1em;
+            }
+            .stat_heading {
+                font-weight: bold;
+            }
+            .field_item {
+                margin-bottom: 0.5em;
+            }
+        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+        <h1>Trainer Tools</h1>
+        <div id="tabs">
+            <ul>
+              <li><a href="#tabs-1">Status</a></li>
+              <li><a href="#tabs-2">Service Configuration</a></li>
+              <li><a href="#tabs-3">Settings</a></li>
+              <li><a href="#tabs-4">Device Configuration</a></li>
+            </ul>
+            <div id="tabs-1">
+                <h2>Current Data</h2>
+                <div class="field_item">
+                    <span class="stat_heading">HR: </span><span id="hr_curr">--</span>
+                </div>
+                <div class="field_item">
+                    <span class="stat_heading">Watts: </span><span id="pwr_curr">--</span>
+                </div>
+            </div>
+            <div id="tabs-2">
+                <div>
+                    <h2>Trainer Tools Service</h2>
+                    <div class="service_status"><span>Status: </span><span id="service_status">Not Connected</span></div>
+                    <div>
+                        <button id="start_service">Start</button>
+                        <button id="stop_service">Stop</button>
+                        <button id="restart_service">Restart</button>
+                    </div>
+                </div>
+                <div>
+                    <h2>System</h2>
+                    <button id="restart_system">Restart</button>
+                    <button id="shutdown_system">Shutdown</button>
+                </div>
+                <div>
+                    <h2>Start Script</h2>
+                    <div class="field_item">
+                        <span class="stat_heading">Current Script: </span><span id="script_curr">--</span>
+                    </div>
+                    <form id="script_form" method="POST" action="/service/start_script">
+                        <select id="scripts" name="start_script">
+                        </select>
+                        <input id="script_form_submit" type="submit" value="Select">
+                    </form>
+                </div>
+            </div>
+            <div id="tabs-3">
+                <<SETTINGS_FIELD_LIST>>
+            </div>
+            <div id="tabs-4">
+                <<DEVICE_SETTINGS_FIELD_LIST>>
+            </div>
+          </div>
+          <div>
+              <h3 id="user_message"></h3>
+          </div>
+    </body>
+</html>

@@ -1,0 +1,15 @@
+[Unit]
+Description=Missionary Server service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User={USER_NAME}
+WorkingDirectory={INSTALL_DIR}
+ExecStart=/usr/bin/env python3 {INSTALL_DIR}/trainer_server.py
+
+[Install]
+WantedBy=multi-user.target
