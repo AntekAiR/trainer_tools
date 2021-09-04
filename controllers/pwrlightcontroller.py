@@ -34,11 +34,16 @@ COLOR_VALUE=2
 
 def build_power_ranges(ftp):
     return (
-            (0,                  (59 * ftp) // 100,  RgbColor(255, 255, 255)), # white
-            ((60 * ftp) // 100,  (75 * ftp) // 100,  RgbColor(0, 0, 255)),     # blue
-            ((76 * ftp) // 100,  (89 * ftp) // 100,  RgbColor(0, 255, 0)),     # green
-            ((90 * ftp) // 100,  (104 * ftp) // 100, RgbColor(255, 235, 0)),   # yellow
-            ((105 * ftp) // 100, (118 * ftp) // 100, RgbColor(255, 64, 0)),    # orange
+            (0,                  (57 * ftp) // 100,  RgbColor(255, 255, 255)), # white
+            ((58 * ftp) // 100,  (60 * ftp) // 100,  RgbColor(135, 206, 255)),     # light blue
+            ((61 * ftp) // 100,  (72 * ftp) // 100,  RgbColor(0, 0, 255)),     # blue
+            ((73 * ftp) // 100,  (75 * ftp) // 100,  RgbColor(60,179,113)),     # medium sea green
+            ((76 * ftp) // 100,  (87 * ftp) // 100,  RgbColor(0, 255, 0)),     # green
+            ((88 * ftp) // 100,  (90 * ftp) // 100,  RgbColor(173,255,47)),     #green yellow
+            ((91* ftp)  // 100,  (101 * ftp) // 100, RgbColor(255, 235, 0)),   # yellow
+            ((102 * ftp) // 100, (104 * ftp) // 100, RgbColor(218,165,32)),    # golden rod
+            ((105 * ftp) // 100, (115 * ftp) // 100, RgbColor(255, 64, 0)),    # orange
+            ((116 * ftp) // 100, (118 * ftp) // 100, RgbColor(255, 32, 0)),    # orange/red
             ((119 * ftp) // 100, 10000,              RgbColor(255, 0, 0)),     # red
            )
 
