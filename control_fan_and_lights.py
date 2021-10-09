@@ -91,6 +91,7 @@ def main():
         hfc = HRFanController(node_stopper.stop_client1, node_stopper.cancel_stop_client1, cfg, hrm, fan)
         logging.info('Attaching ANT+ power meter')
         pwr_meter = node.attach_power_meter()
+        meter_id = node.check_id_of_power_meter()
         logging.info('Initializing power light controller')
         plc = PowerLightController(node_stopper.stop_client2, node_stopper.cancel_stop_client2, cfg, pwr_meter, color_strip)
         logging.info('Starting ANT+ node')        

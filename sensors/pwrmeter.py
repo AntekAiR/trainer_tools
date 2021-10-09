@@ -67,6 +67,8 @@ class AntPlusPowerMeter:
         self._channel.set_rf_freq(ANT_PLUS_FREQUENCY)
         self._channel.set_id(device_number, PWR_METER_DEVICE_TYPE, transfer_type)
         self._lock = FileLock("pwr.curr.lock")
+        self._lock_id = FileLock("ant_device_id.curr.lock")
+        self._ant_device_id = None
     
     def _on_data(self, data):
         logging.debug('Power meter received data %s' % dump_data(data))
@@ -78,6 +80,9 @@ class AntPlusPowerMeter:
                 with self._lock:
                     with open('pwr.curr', 'wt') as f:
                         f.write(str(self._last_pwr))
+                with self._lock_id:
+                    with open('ant_device_id.curr', 'wt') as f:
+                        f.write(str(self._ant_device_id)) #checked already in antnode.py                   
         if data[0] in [0x10, 0x11, 0x12]:
             cadence = int(data[3])
             if self.on_cadence_data != None:

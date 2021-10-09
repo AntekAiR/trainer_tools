@@ -13,6 +13,7 @@ class TrainerToolsService(object):
         self._system = SystemControl()
         self._hr_lock = FileLock("hr.curr.lock")
         self._pwr_lock = FileLock("pwr.curr.lock")
+        self._ant_device_id_lock = FileLock("ant_device_id.curr.lock")
         self._start_scripts = {'Control Fan and Lights': 'control_fan_and_lights.py', 'HR Controlled Fan': 'hr_controlled_fan.py', 'Power Controlled Lights': 'power_controlled_lights.py', 'Heart rate Controlled Lights': 'hr_controlled_lights.py'}
 
     @cherrypy.expose
@@ -72,6 +73,15 @@ class TrainerToolsService(object):
             if time.time() - stat.st_mtime > 4:
                 return '--'
             with open('pwr.curr', 'rt') as f:
+                return f.read()
+
+    @cherrypy.expose
+    def ant_device_id(self): #device id read from file and show on UI
+        with self._ant_device_id_lock:
+            stat = os.stat('ant_device_id.curr')
+            if time.time() - stat.st_mtime > 4:
+                return '--'
+            with open('ant_device_id.curr', 'rt') as f:
                 return f.read()
 
     @cherrypy.expose

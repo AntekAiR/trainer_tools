@@ -8,4 +8,6 @@ hr.curr
 hr.curr.lock
 pwr.curr
 pwr.curr.lock
+ant_device_id.curr
+ant_device_id.curr.lock
 .vscode

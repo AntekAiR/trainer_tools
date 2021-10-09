@@ -184,6 +184,7 @@
                 update_service_status();
                 $("#hr_curr").load("/service/hr_curr");
                 $("#pwr_curr").load("/service/pwr_curr");
+                $("#ant_device_id").load("/service/ant_device_id");
             }
             function init_script_form() {
                 $("#script_curr").load("/service/start_script");
@@ -268,8 +269,11 @@
                     <span class="stat_heading">Watts: </span><span id="pwr_curr">--</span>
                 </div>
                 <div class="field_item">
-                    <span class="stat_heading">Version: </span><span id="soft_version">0.0.4</span>
+                    <span class="stat_heading">Version: </span><span id="soft_version">0.0.5</span>
                 </div>
+                <div class="field_item">
+                    <span class="stat_heading">ANT device ID: </span><span id="ant_device_id">--</span>
+                </div>                
             </div>
             <div id="tabs-2">
                 <div>

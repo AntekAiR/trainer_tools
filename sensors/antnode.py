@@ -57,6 +57,7 @@ class AntPlusNode:
     def __init__(self, network_key):
         self.node = Node()
         self.node.set_network_key(0x00, network_key)
+        self.ant_device_id = 1
 
     def attach_hrm(self, device_number = 0, transfer_type = 0):
         channel = self.node.new_channel(Channel.Type.BIDIRECTIONAL_RECEIVE)
@@ -67,6 +68,7 @@ class AntPlusNode:
     def attach_power_meter(self, device_number = 0, transfer_type = 0):
         channel = self.node.new_channel(Channel.Type.BIDIRECTIONAL_RECEIVE)
         pwr_meter = AntPlusPowerMeter(channel, device_number=device_number, transfer_type=transfer_type)
+        pwr_meter._ant_device_id = self.check_id_of_power_meter() #id checked once at creation of pwr_meter
         channel.open()
         return pwr_meter
 
@@ -97,6 +99,10 @@ class AntPlusNode:
         channel1.open()
         channel2.open()
         return sensor
+
+    def check_id_of_power_meter(self, device_number = 0, transfer_type = 0):
+        meter_id = self.node.request_message(Message.ID.RESPONSE_CHANNEL_ID)
+        return meter_id        
 
     def start(self):
         self.node.start()
